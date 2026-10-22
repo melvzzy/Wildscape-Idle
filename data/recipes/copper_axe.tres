@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="RecipeDefinition" load_steps=2 format=3]
+[ext_resource type="Script" path="res://data/recipe_definition.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = &"copper_axe"
+title = "Kupferaxt · dreifacher Holzertrag"
+costs = {&"wood": 3, &"ore": 4}
+unlock = &"copper_axe"
+required_unlock = &"axe"

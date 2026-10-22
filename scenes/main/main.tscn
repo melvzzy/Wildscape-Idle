@@ -1,4 +1,9 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/world/test_world.tscn" id="2"]
+[ext_resource type="Script" path="res://scenes/main/main.gd" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="4"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -14,12 +19,13 @@ roughness = 1.0
 
 [sub_resource type="BoxMesh" id="Mesh_ground"]
 material = SubResource("Material_ground")
-size = Vector3(24, 1, 24)
+size = Vector3(40, 1, 40)
 
 [sub_resource type="BoxShape3D" id="Shape_ground"]
-size = Vector3(24, 1, 24)
+size = Vector3(40, 1, 40)
 
 [node name="Main" type="Node3D"]
+script = ExtResource("3")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_main")
@@ -39,8 +45,9 @@ mesh = SubResource("Mesh_ground")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
 shape = SubResource("Shape_ground")
 
-[node name="Camera3D" type="Camera3D" parent="."]
-position = Vector3(16, 14, 20)
-rotation_degrees = Vector3(-28.665, 38.66, 0)
-current = true
-fov = 60.0
+[node name="Player" parent="." instance=ExtResource("1")]
+position = Vector3(0, 0.1, 4)
+
+[node name="TestWorld" parent="." instance=ExtResource("2")]
+
+[node name="HUD" parent="." instance=ExtResource("4")]

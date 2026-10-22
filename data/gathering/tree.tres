@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="GatherDefinition" load_steps=2 format=3]
+[ext_resource type="Script" path="res://data/gather_definition.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = &"tree"
+title = "Baum"
+item = &"wood"
+skill = &"woodcutting"
+duration = 1.5
+color = Color(0.18, 0.32, 0.17, 1)

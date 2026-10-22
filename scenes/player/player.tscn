@@ -1,0 +1,50 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scenes/player/player.gd" id="1"]
+
+[sub_resource type="CapsuleShape3D" id="Shape"]
+radius = 0.35
+height = 1.8
+
+[sub_resource type="StandardMaterial3D" id="Cloth"]
+albedo_color = Color(0.29, 0.38, 0.48, 1)
+roughness = 1.0
+
+[sub_resource type="CapsuleMesh" id="Body"]
+material = SubResource("Cloth")
+radius = 0.35
+height = 1.8
+radial_segments = 8
+rings = 2
+
+[sub_resource type="BoxMesh" id="Nose"]
+size = Vector3(0.15, 0.15, 0.25)
+
+[node name="Player" type="CharacterBody3D"]
+script = ExtResource("1")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+position = Vector3(0, 0.9, 0)
+shape = SubResource("Shape")
+
+[node name="Body" type="Node3D" parent="."]
+
+[node name="Mesh" type="MeshInstance3D" parent="Body"]
+position = Vector3(0, 0.9, 0)
+mesh = SubResource("Body")
+
+[node name="Facing" type="MeshInstance3D" parent="Body"]
+position = Vector3(0, 1.5, -0.35)
+mesh = SubResource("Nose")
+
+[node name="CameraPivot" type="Node3D" parent="."]
+position = Vector3(0, 1.5, 0)
+
+[node name="SpringArm3D" type="SpringArm3D" parent="CameraPivot"]
+rotation_degrees = Vector3(-25, 0, 0)
+spring_length = 5.5
+margin = 0.2
+
+[node name="Camera3D" type="Camera3D" parent="CameraPivot/SpringArm3D"]
+current = true
+fov = 65.0

@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="GatherDefinition" load_steps=2 format=3]
+[ext_resource type="Script" path="res://data/gather_definition.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = &"ore"
+title = "Kupferader"
+item = &"ore"
+skill = &"mining"
+required_tool = &"pickaxe"
+duration = 2.0
+xp = 15
+color = Color(0.57, 0.32, 0.18, 1)

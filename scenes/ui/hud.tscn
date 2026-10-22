@@ -1,0 +1,104 @@
+[gd_scene format=3]
+
+[node name="HUD" type="CanvasLayer"]
+
+[node name="Layout" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Instructions" type="Label" parent="Layout"]
+offset_left = 22.0
+offset_top = 16.0
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 18
+text = "WILDSCAPE / DAS ERSTE LAGER\nWASD Bewegung · Maus Kamera · Mausrad Zoom\nE Sammeln / Werkbank · Tab Übersicht · Esc Maus freigeben\nF6 Speichern · F9 Laden"
+
+[node name="Prompt" type="Label" parent="Layout"]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = -115.0
+offset_right = -20.0
+offset_bottom = -65.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 22
+horizontal_alignment = 1
+
+[node name="Progress" type="ProgressBar" parent="Layout"]
+anchor_left = 0.35
+anchor_top = 1.0
+anchor_right = 0.65
+anchor_bottom = 1.0
+offset_top = -58.0
+offset_bottom = -36.0
+max_value = 1.0
+show_percentage = false
+
+[node name="Notice" type="Label" parent="Layout"]
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = -32.0
+offset_right = -20.0
+horizontal_alignment = 1
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+
+[node name="Panel" type="PanelContainer" parent="Layout"]
+visible = false
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -510.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = 575.0
+grow_horizontal = 0
+
+[node name="Margin" type="MarginContainer" parent="Layout/Panel"]
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 16
+
+[node name="Content" type="VBoxContainer" parent="Layout/Panel/Margin"]
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="Layout/Panel/Margin/Content"]
+theme_override_font_sizes/font_size = 24
+text = "Lagerbuch"
+
+[node name="Inventory" type="Label" parent="Layout/Panel/Margin/Content"]
+
+[node name="Skills" type="Label" parent="Layout/Panel/Margin/Content"]
+
+[node name="Tools" type="Label" parent="Layout/Panel/Margin/Content"]
+
+[node name="CraftTitle" type="Label" parent="Layout/Panel/Margin/Content"]
+text = "WERKBANK · nur in der Nähe herstellbar"
+
+[node name="Recipes" type="VBoxContainer" parent="Layout/Panel/Margin/Content"]
+theme_override_constants/separation = 8
+
+[node name="Save" type="Button" parent="Layout/Panel/Margin/Content"]
+text = "Speichern (F6)"
+
+[node name="Load" type="Button" parent="Layout/Panel/Margin/Content"]
+text = "Laden (F9)"
+
+[node name="Close" type="Button" parent="Layout/Panel/Margin/Content"]
+text = "Zurück zum Spiel (Tab)"

@@ -1,0 +1,77 @@
+[gd_scene load_steps=11 format=3]
+[ext_resource type="PackedScene" path="res://scenes/gathering/gather_spot.tscn" id="1"]
+[ext_resource type="Resource" path="res://data/gathering/tree.tres" id="2"]
+[ext_resource type="Resource" path="res://data/gathering/stone.tres" id="3"]
+[ext_resource type="Resource" path="res://data/gathering/ore.tres" id="4"]
+[sub_resource type="StandardMaterial3D" id="Wood"]
+albedo_color = Color(0.36, 0.24, 0.15, 1)
+roughness = 1.0
+[sub_resource type="BoxMesh" id="Bench"]
+material = SubResource("Wood")
+size = Vector3(2, 1, 1)
+[sub_resource type="BoxShape3D" id="BenchShape"]
+size = Vector3(2, 1, 1)
+[sub_resource type="StandardMaterial3D" id="PathMaterial"]
+albedo_color = Color(0.48, 0.41, 0.29, 1)
+roughness = 1.0
+[sub_resource type="BoxMesh" id="Path"]
+material = SubResource("PathMaterial")
+size = Vector3(3, 0.04, 14)
+[sub_resource type="SphereMesh" id="Hill"]
+material = SubResource("PathMaterial")
+radius = 1.0
+height = 2.0
+radial_segments = 8
+rings = 3
+
+[node name="TestWorld" type="Node3D"]
+[node name="Path" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0, -1)
+mesh = SubResource("Path")
+[node name="Workbench" type="StaticBody3D" parent="."]
+position = Vector3(0, 0.5, 0)
+[node name="Mesh" type="MeshInstance3D" parent="Workbench"]
+mesh = SubResource("Bench")
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Workbench"]
+shape = SubResource("BenchShape")
+[node name="Label" type="Label3D" parent="Workbench"]
+position = Vector3(0, 1.3, 0)
+billboard = 1
+text = "STARTLAGER\nWERKBANK · E"
+font_size = 36
+outline_size = 8
+[node name="Tree1" parent="." instance=ExtResource("1")]
+position = Vector3(-3, 0, 2)
+definition = ExtResource("2")
+[node name="Tree2" parent="." instance=ExtResource("1")]
+position = Vector3(-5, 0, -3)
+definition = ExtResource("2")
+[node name="Tree3" parent="." instance=ExtResource("1")]
+position = Vector3(4, 0, -7)
+definition = ExtResource("2")
+[node name="Tree4" parent="." instance=ExtResource("1")]
+position = Vector3(-8, 0, -8)
+definition = ExtResource("2")
+[node name="Stone1" parent="." instance=ExtResource("1")]
+position = Vector3(3, 0, 2)
+definition = ExtResource("3")
+[node name="Stone2" parent="." instance=ExtResource("1")]
+position = Vector3(5, 0, -2)
+definition = ExtResource("3")
+[node name="Stone3" parent="." instance=ExtResource("1")]
+position = Vector3(-4, 0, -7)
+definition = ExtResource("3")
+[node name="Copper1" parent="." instance=ExtResource("1")]
+position = Vector3(4, 0, -10)
+definition = ExtResource("4")
+[node name="Copper2" parent="." instance=ExtResource("1")]
+position = Vector3(-3, 0, -11)
+definition = ExtResource("4")
+[node name="Hill1" type="MeshInstance3D" parent="."]
+position = Vector3(-10, -1.7, -11)
+scale = Vector3(5, 3, 4)
+mesh = SubResource("Hill")
+[node name="Hill2" type="MeshInstance3D" parent="."]
+position = Vector3(10, -1.7, -12)
+scale = Vector3(4, 3, 5)
+mesh = SubResource("Hill")
