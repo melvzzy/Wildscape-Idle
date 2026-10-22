@@ -14,6 +14,11 @@ func _ready() -> void:
 		$Mesh.scale = Vector3(1, 2.5, 1)
 		$Mesh.position.y = 2.0
 		$Trunk.show()
+		var shape := CylinderShape3D.new()
+		shape.radius = 0.75
+		shape.height = 4.0
+		$CollisionShape3D.shape = shape
+		$CollisionShape3D.position.y = 2.0
 
 func available() -> bool:
 	return Time.get_ticks_msec() >= _available_at_ms

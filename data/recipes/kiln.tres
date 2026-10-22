@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="RecipeDefinition" load_steps=2 format=3]
+[ext_resource type="Script" path="res://data/recipe_definition.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = &"kiln"
+title = "Kohlemeiler · 2 Holz → 1 Holzkohle / 5 s"
+costs = {&"wood": 5, &"stone": 5, &"ore": 2}
+unlock = &"kiln"
+required_unlock = &"pickaxe"

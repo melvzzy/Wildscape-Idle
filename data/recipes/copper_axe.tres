@@ -4,6 +4,6 @@
 script = ExtResource("1")
 id = &"copper_axe"
 title = "Kupferaxt · dreifacher Holzertrag"
-costs = {&"wood": 3, &"ore": 4}
+costs = {&"wood": 3, &"ore": 4, &"charcoal": 2}
 unlock = &"copper_axe"
 required_unlock = &"axe"

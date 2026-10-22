@@ -2,6 +2,7 @@ extends Node3D
 
 const REACH: float = 3.0
 const SKILL_TITLES: Dictionary = {&"woodcutting": "Holzfällen", &"mining": "Bergbau"}
+const UNLOCK_TITLES: Dictionary = {&"axe": "Steinaxt", &"pickaxe": "Spitzhacke", &"copper_axe": "Kupferaxt", &"kiln": "Meiler"}
 var state := GameState.new()
 var _target: GatherSpot
 var _active: GatherSpot
@@ -9,11 +10,14 @@ var _gather_started_ms: int = 0
 var _duration_ms: int = 0
 var _recipe_buttons: Dictionary[StringName, Button] = {}
 var _last_near_bench: bool = false
+var _last_near_kiln: bool = false
+var _last_tick_ms: int = 0
 
 @onready var player: CharacterBody3D = $Player
 @onready var bench: Node3D = $TestWorld/Workbench
+@onready var kiln: Node3D = $TestWorld/Kiln
 @onready var ui: Control = $HUD/Layout
-@onready var content: VBoxContainer = $HUD/Layout/Panel/Margin/Content
+@onready var content: VBoxContainer = $HUD/Layout/Panel/Margin/Scroll/Content
 
 func _ready() -> void:
 	get_tree().auto_accept_quit = false
@@ -27,6 +31,7 @@ func _ready() -> void:
 	content.get_node("Save").pressed.connect(_save)
 	content.get_node("Load").pressed.connect(_load)
 	content.get_node("Close").pressed.connect(_toggle_panel)
+	content.get_node("Production").pressed.connect(_toggle_production)
 	var result := SaveGame.load_state(state)
 	if result == ERR_FILE_NOT_FOUND:
 		_notice("Sammle Holz und Stein. Stelle an der Werkbank eine Spitzhacke her.")
@@ -35,6 +40,7 @@ func _ready() -> void:
 	else:
 		_notice("Spielstand geladen.")
 	_refresh()
+	_last_tick_ms = Time.get_ticks_msec()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("toggle_panel"):
@@ -47,13 +53,20 @@ func _unhandled_input(event: InputEvent) -> void:
 		if _near_bench():
 			if not ui.get_node("Panel").visible:
 				_toggle_panel()
+		elif _near_kiln():
+			_toggle_production()
 		elif _target != null and not ui.get_node("Panel").visible:
 			_start_gather(_target)
 
 func _physics_process(_delta: float) -> void:
+	var now := Time.get_ticks_msec()
+	state.advance_production(float(now - _last_tick_ms) / 1000.0)
+	_last_tick_ms = now
 	var near_bench := _near_bench()
-	if near_bench != _last_near_bench:
+	var near_kiln := _near_kiln()
+	if near_bench != _last_near_bench or near_kiln != _last_near_kiln:
 		_last_near_bench = near_bench
+		_last_near_kiln = near_kiln
 		_refresh()
 	_target = _nearest_spot()
 	if _active != null:
@@ -76,6 +89,8 @@ func _physics_process(_delta: float) -> void:
 		prompt = "%s wird gesammelt … Bleibe in der Nähe." % _active.definition.title
 	elif near_bench:
 		prompt = "E · Werkbank öffnen"
+	elif near_kiln:
+		prompt = "E · Meiler ein-/ausschalten" if state.has_unlock(&"kiln") else "Meiler · an der Werkbank freischalten (Spitzhacke + Kupfer)"
 	elif _target != null:
 		if not _target.available():
 			prompt = "%s · wächst bald nach" % _target.definition.title
@@ -84,6 +99,21 @@ func _physics_process(_delta: float) -> void:
 		else:
 			prompt = "E · %s sammeln" % _target.definition.title
 	ui.get_node("Prompt").text = prompt
+	ui.get_node("Prompt").visible = not ui.get_node("Panel").visible
+	if near_kiln and state.production_enabled():
+		ui.get_node("Prompt").text += " · läuft / wartet auf Holz · %d %%" % int(state.production_progress() * 100)
+	$TestWorld/Kiln/Label.text = "KOHLEMEILER\n" + ("AKTIV · E" if state.production_enabled() else "INAKTIV · E")
+
+func _near_kiln() -> bool:
+	return player.global_position.distance_to(kiln.global_position) <= REACH
+
+func _toggle_production() -> void:
+	if not _near_kiln():
+		_notice("Zum Bedienen näher an den Meiler gehen.")
+	elif not state.toggle_production():
+		_notice("Meiler zuerst an der Werkbank freischalten.")
+	else:
+		_notice("Meiler aktiv: 2 Holz → 1 Holzkohle alle 5 s." if state.production_enabled() else "Meiler angehalten.")
 
 func _near_bench() -> bool:
 	return player.global_position.distance_to(bench.global_position) <= REACH
@@ -108,6 +138,8 @@ func _nearest_spot() -> GatherSpot:
 	return nearest
 
 func _start_gather(spot: GatherSpot) -> void:
+	if _active != null:
+		return
 	if not _can_reach(spot) or not state.has_unlock(spot.definition.required_tool):
 		_notice("Benötigtes Werkzeug fehlt oder Ressource ist zu weit entfernt.")
 		return
@@ -160,8 +192,11 @@ func _refresh() -> void:
 		button.text = entry.title + "\n" + costs
 		button.disabled = not _near_bench() or not state.can_craft(entry.id)
 		if state.has_unlock(entry.unlock):
-			tools += " · " + String(entry.id)
+			tools += " · " + UNLOCK_TITLES[entry.unlock]
 	content.get_node("Tools").text = tools
+	var production: Button = content.get_node("Production")
+	production.disabled = not _near_kiln() or not state.has_unlock(&"kiln")
+	production.text = "Meiler anhalten" if state.production_enabled() else "Meiler starten (am Meiler)"
 
 func _item_title(id: StringName) -> String:
 	for item: ItemDefinition in GameState.ITEMS:
@@ -179,6 +214,7 @@ func _save() -> void:
 func _load() -> void:
 	_cancel_gather()
 	var result := SaveGame.load_state(state)
+	_last_tick_ms = Time.get_ticks_msec()
 	_notice("Spielstand geladen." if result == OK else "Laden fehlgeschlagen; Sitzung unverändert: " + error_string(result))
 
 func _notification(what: int) -> void:

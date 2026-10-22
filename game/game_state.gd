@@ -3,8 +3,9 @@ extends RefCounted
 
 signal changed
 
-const ITEMS = [preload("res://data/items/wood.tres"), preload("res://data/items/stone.tres"), preload("res://data/items/ore.tres")]
-const RECIPES = [preload("res://data/recipes/axe.tres"), preload("res://data/recipes/pickaxe.tres"), preload("res://data/recipes/copper_axe.tres")]
+const ITEMS = [preload("res://data/items/wood.tres"), preload("res://data/items/stone.tres"), preload("res://data/items/ore.tres"), preload("res://data/items/charcoal.tres")]
+const RECIPES = [preload("res://data/recipes/axe.tres"), preload("res://data/recipes/pickaxe.tres"), preload("res://data/recipes/kiln.tres"), preload("res://data/recipes/copper_axe.tres")]
+const PRODUCTION: ProductionDefinition = preload("res://data/production/kiln.tres")
 const GATHERING = [preload("res://data/gathering/tree.tres"), preload("res://data/gathering/stone.tres"), preload("res://data/gathering/ore.tres")]
 const MAX_AMOUNT: int = 1000000
 const SKILLS: Array[StringName] = [&"woodcutting", &"mining"]
@@ -12,6 +13,8 @@ const SKILLS: Array[StringName] = [&"woodcutting", &"mining"]
 var _inventory: Dictionary[StringName, int] = {}
 var _unlocks: Dictionary[StringName, bool] = {}
 var _xp: Dictionary[StringName, int] = {}
+var _production_enabled: bool = false
+var _production_progress: float = 0.0
 
 func amount(id: StringName) -> int:
 	return _inventory.get(id, 0)
@@ -23,6 +26,7 @@ func skill_xp(id: StringName) -> int:
 	return _xp.get(id, 0)
 
 func level(id: StringName) -> int:
+	@warning_ignore("integer_division")
 	return 1 + skill_xp(id) / 50
 
 func known_item(id: StringName) -> bool:
@@ -94,7 +98,39 @@ func gather(definition: GatherDefinition) -> bool:
 	return true
 
 func snapshot() -> Dictionary:
-	return {"inventory": _inventory.duplicate(), "unlocks": _unlocks.duplicate(), "xp": _xp.duplicate()}
+	return {"inventory": _inventory.duplicate(), "unlocks": _unlocks.duplicate(), "xp": _xp.duplicate(), "production_enabled": _production_enabled, "production_progress": _production_progress}
+
+func production_enabled() -> bool:
+	return _production_enabled
+
+func production_progress() -> float:
+	return _production_progress / PRODUCTION.seconds_per_batch
+
+func toggle_production() -> bool:
+	if not has_unlock(PRODUCTION.required_unlock):
+		return false
+	_production_enabled = not _production_enabled
+	changed.emit()
+	return true
+
+func advance_production(seconds: float) -> int:
+	if not is_finite(seconds) or seconds <= 0 or not _production_enabled or not has_unlock(PRODUCTION.required_unlock):
+		return 0
+	@warning_ignore("integer_division")
+	var available_batches := mini(amount(PRODUCTION.input_item) / PRODUCTION.input_amount, MAX_AMOUNT - amount(PRODUCTION.output_item))
+	if available_batches <= 0:
+		_production_progress = 0.0
+		return 0
+	# Cap elapsed time to material capacity before converting it to integer batches.
+	var elapsed := minf(_production_progress + seconds, available_batches * PRODUCTION.seconds_per_batch)
+	# Tolerate floating-point roundoff at exact batch boundaries.
+	var batches := mini(int(floor(elapsed / PRODUCTION.seconds_per_batch + 0.000000001)), available_batches)
+	_production_progress = maxf(0.0, elapsed - batches * PRODUCTION.seconds_per_batch)
+	if batches > 0:
+		_inventory[PRODUCTION.input_item] = amount(PRODUCTION.input_item) - batches * PRODUCTION.input_amount
+		_inventory[PRODUCTION.output_item] = amount(PRODUCTION.output_item) + batches
+		changed.emit()
+	return batches
 
 func restore(data: Dictionary) -> bool:
 	# Validate into temporary dictionaries; a failed load leaves the live game intact.
@@ -127,9 +163,21 @@ func restore(data: Dictionary) -> bool:
 		unlocks[id] = data.unlocks[key]
 	if unlocks.get(&"copper_axe", false) and not unlocks.get(&"axe", false):
 		return false
+	if unlocks.get(&"kiln", false) and not unlocks.get(&"pickaxe", false):
+		return false
+	var enabled: Variant = data.get("production_enabled", false)
+	var progress: Variant = data.get("production_progress", 0.0)
+	if not enabled is bool or (not progress is int and not progress is float):
+		return false
+	if not is_finite(float(progress)) or float(progress) < 0 or float(progress) >= PRODUCTION.seconds_per_batch:
+		return false
+	if (enabled or float(progress) > 0) and not unlocks.get(PRODUCTION.required_unlock, false):
+		return false
 	_inventory = inventory
 	_unlocks = unlocks
 	_xp = xp
+	_production_enabled = enabled
+	_production_progress = float(progress)
 	changed.emit()
 	return true
 
