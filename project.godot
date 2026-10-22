@@ -1,0 +1,20 @@
+; Engine configuration file. Prefer editing settings through the Godot editor.
+config_version=5
+
+[application]
+
+config/name="Wildscape Idle"
+run/main_scene="res://scenes/main/main.tscn"
+config/features=PackedStringArray("4.3", "GL Compatibility")
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.55, 0.65, 0.69, 1)

@@ -1,0 +1,12 @@
+# Godot-generated cache and editor state
+.godot/
+
+# Local export output and credentials
+/build/
+/dist/
+export_credentials.cfg
+
+# Operating system clutter
+.DS_Store
+Thumbs.db
+Desktop.ini
